@@ -9,19 +9,6 @@ export default function App() {
     setSolution((solution) => solution + value);
   };
 
-  const calculateAnswer = () => {
-    if (solution.trim() === "") {
-      return setAnswer("Error");
-    }
-
-    try {
-      const result = evaluateExpression(solution);
-      setAnswer(result);
-    } catch (error) {
-      setAnswer("Error");
-    }
-  };
-
   const evaluateExpression = (expression) => {
     const tokens = expression.match(/\d+|\D/g);
     if (!tokens) throw new Error("Invalid expression");
@@ -51,6 +38,22 @@ export default function App() {
     }
 
     return result;
+  };
+
+  const calculateAnswer = () => {
+    if (solution.trim() === "") {
+      return setAnswer("Error");
+    }
+
+    try {
+      if (solution.includes("/0")) {
+        throw new Error("Division zero by zero");
+      }
+      const result = evaluateExpression(solution);
+      setAnswer(result);
+    } catch (error) {
+      setAnswer("Error");
+    }
   };
 
   const clear = () => {
