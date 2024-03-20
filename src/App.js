@@ -1,7 +1,84 @@
 import React, { useState } from "react";
 import "./App.css";
 
-export default function App() {
+function precedence(op) {
+  if (op === "+" || op === "-") {
+    return 1;
+  }
+  if (op === "*" || op === "/") {
+    return 2;
+  }
+  return 0;
+}
+
+function applyOp(a, b, op) {
+  switch (op) {
+    case "+":
+      return a + b;
+    case "-":
+      return a - b;
+    case "*":
+      return a * b;
+    case "/":
+      return a / b;
+    default:
+      return 0;
+  }
+}
+
+function evaluateExpression(tokens) {
+  let values = [];
+  let ops = [];
+  let i = 0;
+
+  while (i < tokens.length) {
+    if (tokens[i] === " ") {
+      i++;
+      continue;
+    } else if (tokens[i] === "(") {
+      ops.push(tokens[i]);
+    } else if (!isNaN(parseInt(tokens[i]))) {
+      let val = 0;
+      while (i < tokens.length && !isNaN(parseInt(tokens[i]))) {
+        val = val * 10 + parseInt(tokens[i]);
+        i++;
+      }
+      values.push(val);
+      continue;
+    } else if (tokens[i] === ")") {
+      while (ops.length !== 0 && ops[ops.length - 1] !== "(") {
+        let val2 = values.pop();
+        let val1 = values.pop();
+        let op = ops.pop();
+        values.push(applyOp(val1, val2, op));
+      }
+      ops.pop();
+    } else {
+      while (
+        ops.length !== 0 &&
+        precedence(ops[ops.length - 1]) >= precedence(tokens[i])
+      ) {
+        let val2 = values.pop();
+        let val1 = values.pop();
+        let op = ops.pop();
+        values.push(applyOp(val1, val2, op));
+      }
+      ops.push(tokens[i]);
+    }
+    i++;
+  }
+
+  while (ops.length !== 0) {
+    let val2 = values.pop();
+    let val1 = values.pop();
+    let op = ops.pop();
+    values.push(applyOp(val1, val2, op));
+  }
+
+  return values.pop();
+}
+
+function App() {
   const [solution, setSolution] = useState("");
   const [answer, setAnswer] = useState("");
 
@@ -9,51 +86,10 @@ export default function App() {
     setSolution((solution) => solution + value);
   };
 
-  const evaluateExpression = (expression) => {
-    const tokens = expression.match(/\d+|\D/g);
-    if (!tokens) throw new Error("Invalid expression");
-
-    // Evaluate multiplication and division first
-    let result = parseInt(tokens[0], 10);
-    for (let i = 1; i < tokens.length; i += 2) {
-      const operator = tokens[i];
-      const operand = parseInt(tokens[i + 1], 10);
-      if (operator === "*") {
-        result *= operand;
-      } else if (operator === "/") {
-        if (operand === 0) throw new Error("Division by zero");
-        result /= operand;
-      }
-    }
-
-    // Evaluate addition and subtraction
-    for (let i = 1; i < tokens.length; i += 2) {
-      const operator = tokens[i];
-      const operand = parseInt(tokens[i + 1], 10);
-      if (operator === "+") {
-        result += operand;
-      } else if (operator === "-") {
-        result -= operand;
-      }
-    }
-
-    return result;
-  };
-
   const calculateAnswer = () => {
-    if (solution.trim() === "") {
-      return setAnswer("Error");
-    }
-
-    try {
-      if (solution.includes("/0")) {
-        throw new Error("Division zero by zero");
-      }
-      const result = evaluateExpression(solution);
-      setAnswer(result);
-    } catch (error) {
-      setAnswer("Error");
-    }
+    const tokens = solution.split(/(\+|\-|\*|\/|\(|\))/).filter((token) => token.trim() !== "");
+    const result = evaluateExpression(tokens);
+    setAnswer(result);
   };
 
   const clear = () => {
@@ -133,3 +169,5 @@ export default function App() {
     </div>
   );
 }
+
+export default App;
