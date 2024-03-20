@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import { useSnackbar } from "notistack";
 import "./App.css";
+
 
 function precedence(op) {
   if (op === "+" || op === "-") {
@@ -81,6 +83,7 @@ function evaluateExpression(tokens) {
 function App() {
   const [solution, setSolution] = useState("");
   const [answer, setAnswer] = useState("");
+  const { enqueueSnackbar } = useSnackbar(); // Access enqueueSnackbar function from useSnackbar hook
 
   const handleButtonClick = (value) => {
     setSolution((solution) => solution + value);
@@ -88,7 +91,19 @@ function App() {
 
   const calculateAnswer = () => {
     const tokens = solution.split(/(\+|\-|\*|\/|\(|\))/).filter((token) => token.trim() !== "");
+
+    if (tokens.includes("NaN")) {
+      enqueueSnackbar("Invalid expression: NaN", { variant: "warning" }); // Display warning for NaN
+      return;
+    }
+
     const result = evaluateExpression(tokens);
+
+    if (!isFinite(result)) {
+      enqueueSnackbar("Invalid expression: Division by zero", { variant: "warning" }); // Display warning for division by zero
+      return;
+    }
+
     setAnswer(result);
   };
 
@@ -113,11 +128,12 @@ function App() {
   return (
     <div className="App">
       <h1>React Calculator</h1>
-      <input value={solution} readOnly />
+      <input type="text" value={solution} readOnly />
       <h1>{answer}</h1>
       <button style={buttonStyle} onClick={() => handleButtonClick("7")}>
         7
       </button>
+
       <button style={buttonStyle} onClick={() => handleButtonClick("8")}>
         8
       </button>
@@ -160,12 +176,15 @@ function App() {
       <button style={buttonStyle} onClick={() => handleButtonClick("0")}>
         0
       </button>
+      
+      
       <button style={buttonStyle} onClick={calculateAnswer}>
         =
       </button>
       <button style={buttonStyle} onClick={() => handleButtonClick("/")}>
         /
       </button>
+      
     </div>
   );
 }
