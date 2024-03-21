@@ -94,7 +94,9 @@ function App() {
   
     const result = evaluateExpression(tokens);
     if (solution.trim() === "") {
-      return setAnswer("Error");
+      enqueueSnackbar("Error", { variant: "warning" }); // Display warning for division by zero
+      setAnswer("Error");
+      return;
     }
   
     if (result === Infinity) {
