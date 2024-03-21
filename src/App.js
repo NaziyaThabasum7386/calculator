@@ -93,6 +93,9 @@ function App() {
     const tokens = solution.split(/(\+|\-|\*|\/|\(|\))/).filter((token) => token.trim() !== "");
   
     const result = evaluateExpression(tokens);
+    if (solution.trim() === "") {
+      return setAnswer("Error");
+    }
   
     if (result === Infinity) {
       enqueueSnackbar("Infinity", { variant: "warning" }); // Display warning for division by zero
