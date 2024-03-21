@@ -88,24 +88,29 @@ function App() {
   const handleButtonClick = (value) => {
     setSolution((solution) => solution + value);
   };
-
   const calculateAnswer = () => {
+    
     const tokens = solution.split(/(\+|\-|\*|\/|\(|\))/).filter((token) => token.trim() !== "");
-
-    if (tokens.includes("NaN")) {
-      enqueueSnackbar("Invalid expression: NaN", { variant: "warning" }); // Display warning for NaN
-      return;
-    }
-
+  
     const result = evaluateExpression(tokens);
-
-    if (!isFinite(result)) {
-      enqueueSnackbar("Invalid expression: Division by zero", { variant: "warning" }); // Display warning for division by zero
+  
+    if (result === Infinity) {
+      enqueueSnackbar("Infinity", { variant: "warning" }); // Display warning for division by zero
+      setAnswer("Infinity");
+      return;
+    } 
+  
+    if (isNaN(result)) {
+      enqueueSnackbar("NaN", { variant: "warning" }); // Display warning for incomplete expression
+      setAnswer("NaN");
       return;
     }
-
+  
+  
     setAnswer(result);
   };
+  
+
 
   const clear = () => {
     setSolution("");
